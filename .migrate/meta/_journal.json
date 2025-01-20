@@ -8,6 +8,13 @@
       "when": 1737213736393,
       "tag": "0000_careful_smiling_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1737389269475,
+      "tag": "0001_amusing_zodiak",
+      "breakpoints": true
     }
   ]
 }

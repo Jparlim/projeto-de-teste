@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx --env-file .env watch src/http/app.ts"
+    "dev": "tsx --env-file .env watch src/http/app.ts",
+    "seed": "tsx --env-file .env src/db/seed.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
     "@types/node": "^22.10.7",
     "drizzle-kit": "^0.30.2",
     "drizzle-orm": "^0.38.4",
