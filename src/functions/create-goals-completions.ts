@@ -1,24 +1,57 @@
 import { db } from '../db'
-import { goalCompletions } from '../db/schema'
+import { goalCompletions, goals } from '../db/schema'
+import dayjs from 'dayjs'
+import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
 
 interface completionsGoalRequest {
-    goalId: string
+  goalId: string
 }
 
-export async function creategoals({ goalId }: completionsGoalRequest) {
-  const result = await db
-    .insert(goalCompletions)
-    .values({
-     goalId
+export async function creategoalscompletios({
+  goalId,
+}: completionsGoalRequest) {
+  const lastdayofweek = dayjs().endOf('week').toDate()
+  const firstdayofweek = dayjs().startOf('week').toDate()
+
+  const GoalsCompletionsCounts = db.$with('goals-completios-count').as(
+    db
+      .select({
+        goalId: goalCompletions.goalId,
+        goalscompletiosncount: count(goalCompletions.id).as(
+          'goalscompletiosncount'
+        ),
+      })
+      .from(goalCompletions)
+      .where(
+        and(
+          gte(goalCompletions.createdAt, firstdayofweek),
+          lte(goalCompletions.createdAt, lastdayofweek)
+        )
+      )
+      .groupBy(goalCompletions.goalId)
+  )
+
+  const result2 = await db
+    .with(GoalsCompletionsCounts)
+    .select({
+      title: goals.title,
+      desiredWeeklyFrequency: goals.desiredWeeklyFrequency,
+      goalscompletiosncount: sql`
+      COALESCE(${GoalsCompletionsCounts.goalscompletiosncount}, 0)`.mapWith(
+        Number
+      ),
     })
-    .returning()
+    .from(goals)
+    .leftJoin(
+      GoalsCompletionsCounts,
+      eq(GoalsCompletionsCounts.goalId, goals.id)
+    )
+    .where(eq(goals.id, goalId))
 
   //colocando o returning no final o array, ele me traz os
   //valores que foram inseridos no array
 
-  const goalcompletions = result[0]
-
   return {
-    goalcompletions,
+    result2,
   }
 }

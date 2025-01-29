@@ -1,6 +1,7 @@
 import fastify from 'fastify'
 import { creategoals } from '../functions/create-goals'
-import z from 'zod'
+import { creategoalscompletios } from '../functions/create-goals-completions'
+import z, { Schema, string } from 'zod'
 
 import {
   serializerCompiler,
@@ -26,12 +27,6 @@ app.post(
     },
   },
   async request => {
-    const creategoalschema = z.object({
-      title: z.string(),
-      desiredWeeklyFrequency: z.number().int().min(1).max(6),
-    })
-    const body = creategoalschema.parse(request.body)
-
     const { title, desiredWeeklyFrequency } = request.body
 
     await creategoals({
@@ -46,6 +41,26 @@ app.get('/pendings', async () => {
 
   return pendinggoals
 })
+
+app.post(
+  '/goalscompletions',
+  {
+    schema: {
+      body: z.object({
+        goalId: z.string(),
+      }),
+    },
+  },
+  async request => {
+    const { goalId } = request.body
+
+    const result = await creategoalscompletios({
+      goalId,
+    })
+
+    return result
+  }
+)
 
 /*
 app.post('/goals', async request => {
